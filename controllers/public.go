@@ -21,8 +21,21 @@ func (c *PublicController) URLMapping() {
 // Param password formData string true "登录密码“
 // @router /login [post]
 func (c *PublicController) Login() {
-
-	// c.JsonReturn("登录成功!", user, http.StatusOK)
+	r := requests.LoginRequest{}
+	if err := c.ParseForm(&r); err != nil {
+		c.JsonReturn("解析参数错误: " + err.Error(), "", http.StatusNotFound)
+		return
+	}
+	userService := services.NewUserService()
+	token, err := userService.Login(r)
+	if err != nil {
+		c.JsonReturn("登录错误:" + err.Error(), "", http.StatusForbidden)
+		return
+	}
+	result := map[string]string{
+		"token": token,
+	}
+	c.JsonReturn("登录成功!", result, http.StatusOK)
 }
 
 // Title register

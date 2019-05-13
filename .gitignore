@@ -1,4 +1,6 @@
 .idea
 api.exe
 api.exe~
+api
 lastupdate.tmp
+routers/commentsRouter*

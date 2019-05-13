@@ -9,17 +9,33 @@ package routers
 
 import (
 	"api/controllers"
-
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
+	"net/http"
 )
 
 func init() {
-	ns := beego.NewNamespace("/api",
-		beego.NSNamespace("/public",
+	var auth = func(c *context.Context) {
+		if c.Input.Header("Authorization") == "" {
+			c.Output.Status = http.StatusForbidden
+		}
+	}
+	// public api
+	ns := beego.NewNamespace("/public",
+		beego.NSInclude(
+			&controllers.PublicController{},
+		),
+	)
+	// auth api
+	ns2 := beego.NewNamespace("/api",
+		beego.NSBefore(
+			auth,
+		),
+		beego.NSNamespace("/articles",
 			beego.NSInclude(
-				&controllers.PublicController{},
+				&controllers.ArticleController{},
 			),
 		),
 	)
-	beego.AddNamespace(ns)
+	beego.AddNamespace(ns, ns2)
 }
