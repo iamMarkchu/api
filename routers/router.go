@@ -10,16 +10,9 @@ package routers
 import (
 	"api/controllers"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/context"
-	"net/http"
 )
 
 func init() {
-	var auth = func(c *context.Context) {
-		if c.Input.Header("Authorization") == "" {
-			c.Output.Status = http.StatusForbidden
-		}
-	}
 	// public api
 	ns := beego.NewNamespace("/public",
 		beego.NSInclude(

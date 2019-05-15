@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"api/controllers/requests"
+	"api/helpers"
 	"api/models"
+	"github.com/astaxie/beego/validation"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type ArticleController struct {
@@ -13,21 +14,29 @@ type ArticleController struct {
 
 func (c *ArticleController) URLMapping() {
 	c.Mapping("Index", c.Index)
+	c.Mapping("Store", c.Store)
 }
 
 // @router / [get]
 func (c *ArticleController) Index() {
 	var articles []models.Article
-	for i := 1; i < 10; i++ {
-		tmp := models.Article{
-			Id:           i,
-			Title:        "Ttile" + strconv.Itoa(i),
-			Description:  "11111111111",
-			Author:       "chukui",
-			CreatedAt:    time.Now(),
-			CreatedAtStr: time.Now().Format("2006-01-02 15:04:05"),
-		}
-		articles = append(articles, tmp)
-	}
 	c.JsonReturn("文章列表接口", articles, http.StatusOK)
+}
+
+// @router / [post]
+func (c *ArticleController) Store() {
+	r := requests.ArticleStoreRequest{}
+	if err := c.ParseForm(&r); err != nil {
+		c.JsonReturn("解析参数错误: " + err.Error(), "", http.StatusNotFound)
+		return
+	}
+
+	valid := validation.Validation{}
+	isValid, _ := valid.Valid(&r)
+	if !isValid {
+		c.JsonReturn("参数不符合要求!", helpers.GetErrorMap(valid.Errors), http.StatusNotFound)
+		return
+	}
+
+	c.JsonReturn("新建文章接口", "", http.StatusOK)
 }

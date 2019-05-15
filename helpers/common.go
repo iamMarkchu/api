@@ -3,6 +3,8 @@ package helpers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/validation"
 	"regexp"
 )
 
@@ -19,4 +21,17 @@ func MD5(s string) string {
 	return hex.EncodeToString(cipherStr)
 }
 
-//
+// 检查错误
+func CheckError(err error, msg string)  {
+	if err != nil {
+		logs.Info("["+msg+"]:", err.Error())
+	}
+}
+
+func GetErrorMap(errs []*validation.Error) map[string]string  {
+	var errorMaps = make(map[string]string)
+	for _, err := range errs {
+		errorMaps[err.Key] = err.Message
+	}
+	return errorMaps
+}

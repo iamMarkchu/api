@@ -9,7 +9,7 @@ import (
 
 type User struct {
 	Id        int    `orm:"auto"`
-	UserName  string `orm:"size(30);description(用户名 )"`
+	UserName  string `orm:"size(30);description(用户名)"`
 	Password  string  `orm:"default('');description(密码)"`
 	Email     string  `orm:"default('');description(电子邮箱)"`
 	Mobile    string    `orm:"default('');description(手机号)"`
