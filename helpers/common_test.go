@@ -17,3 +17,7 @@ func TestCheckEmail(t *testing.T) {
 		t.Errorf("CheckEmail(%s) = (%t); expected (%t)", email2, matched, false)
 	}
 }
+
+func TestCheckDirectory(t *testing.T) {
+	CheckDirectory("/Users/mark/go/src/api/static/upload/")
+}

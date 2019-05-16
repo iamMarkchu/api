@@ -29,6 +29,7 @@ func init() {
 				&controllers.ArticleController{},
 			),
 		),
+		beego.NSRouter("/upload", &controllers.UploadController{}),
 	)
 	beego.AddNamespace(ns, ns2)
 }

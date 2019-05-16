@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
+	"os"
 	"regexp"
 )
 
@@ -34,4 +35,12 @@ func GetErrorMap(errs []*validation.Error) map[string]string  {
 		errorMaps[err.Key] = err.Message
 	}
 	return errorMaps
+}
+
+// 检查路径是否存在，是否可写
+func CheckDirectory(dir string) {
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		logs.Info(err.Error())
+	}
 }
