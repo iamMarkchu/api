@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/cache"
 	_ "github.com/astaxie/beego/cache/redis"
 	"github.com/astaxie/beego/logs"
@@ -8,7 +9,7 @@ import (
 
 var (
 	Instance cache.Cache
-	err           error
+	err      error
 )
 
 func GetCacheInstance() cache.Cache {
@@ -17,7 +18,7 @@ func GetCacheInstance() cache.Cache {
 
 func init() {
 	logs.Info("[CACHE INIT START]")
-	Instance, err = cache.NewCache("redis", `{"key": "api","conn": ":6379"}`)
+	Instance, err = cache.NewCache("redis", beego.AppConfig.String("redisconn"))
 	if err != nil {
 		logs.Error("[CACHE INIT]:", err.Error())
 	}

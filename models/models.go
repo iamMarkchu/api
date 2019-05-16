@@ -1,6 +1,8 @@
 package models
 
 import (
+	"api/helpers"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -12,9 +14,13 @@ const (
 )
 
 func init() {
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-	orm.RegisterDataBase("default", "mysql", "root:chukui@tcp(localhost)/api_base?charset=utf8")
+	err := orm.RegisterDriver("mysql", orm.DRMySQL)
+	helpers.CheckError(err, "[RegisterDriver Error]")
+	err = orm.RegisterDataBase("default", "mysql", beego.AppConfig.String("sqlconn"))
+	helpers.CheckError(err, "[RegisterDataBase Error]")
 	orm.RegisterModel(new(User), new(Article))
-	orm.RunSyncdb("default", false, true)
-	orm.Debug = true
+	err = orm.RunSyncdb("default", false, true)
+	helpers.CheckError(err, "[RunSyncdb Error]")
+	orm.Debug, err = beego.AppConfig.Bool("ormdebug")
+	helpers.CheckError(err, "[orm Debug Error]")
 }
