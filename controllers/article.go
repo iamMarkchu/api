@@ -2,10 +2,14 @@ package controllers
 
 import (
 	"api/controllers/requests"
-	"api/helpers"
+	. "api/helpers"
+	"api/helpers/cache"
 	"api/models"
-	"github.com/astaxie/beego/validation"
+	"api/services"
+	"fmt"
+	bcache "github.com/astaxie/beego/cache"
 	"net/http"
+	"strings"
 )
 
 type ArticleController struct {
@@ -26,17 +30,16 @@ func (c *ArticleController) Index() {
 // @router / [post]
 func (c *ArticleController) Store() {
 	r := requests.ArticleStoreRequest{}
-	if err := c.ParseForm(&r); err != nil {
-		c.JsonReturn("解析参数错误: " + err.Error(), "", http.StatusNotFound)
-		return
+	c.ValidateRequest(r)
+	articleService := services.NewArticleService()
+	// 获取UserId
+	bm := cache.GetCacheInstance()
+	token := strings.TrimPrefix(c.Ctx.Input.Header("Authorization"), "Bearer ")
+	userId := bcache.GetInt(bm.Get(MD5(token)))
+	fmt.Println("userId:", userId)
+	article, isSuccess := articleService.Store(r, userId)
+	if isSuccess {
+		c.JsonReturn("新建文章接口", article, http.StatusOK)
 	}
-
-	valid := validation.Validation{}
-	isValid, _ := valid.Valid(&r)
-	if !isValid {
-		c.JsonReturn("参数不符合要求!", helpers.GetErrorMap(valid.Errors), http.StatusNotFound)
-		return
-	}
-
-	c.JsonReturn("新建文章接口", "", http.StatusOK)
+	c.JsonReturn("新建文章失败", models.Article{}, http.StatusBadRequest)
 }

@@ -1,37 +1,44 @@
 package controllers
 
 import (
-	"api/helpers"
+	. "api/helpers"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"time"
+	"path"
 )
 
 type UploadController struct {
 	ApiController
 }
 
+var (
+	dir      string // 上传文件根路径
+	filename string // 上传文件名
+)
+
 // Title 上传文件
 // Param file
 // Param remark
-func (c *UploadController) Post()  {
+func (c *UploadController) Post() {
 	f, h, err := c.GetFile("file")
 	if err != nil {
 		logs.Info("上传文件解析参数错误:", err.Error())
+		c.JsonReturn("上传文件解析参数错误:"+err.Error(), "", 500)
 	}
 	defer f.Close()
 
-	dir := "static/upload/" + time.Now().Format("2006/01/02/")
-	helpers.CheckDirectory(dir)
-	filename := dir + h.Filename
-	err = c.SaveToFile("file", filename)
+	dir = beego.AppConfig.String("StaticUploadPath")
+	filename = GetUniqueFileName(h.Filename)
+	CheckDirectory(dir + path.Dir(filename))
+	err = c.SaveToFile("file", dir+filename)
 	if err != nil {
 		logs.Info("保存文件错误", err.Error())
+		c.JsonReturn("保存文件错误", "", 500)
 	}
 
-	result := map[string]string{
+	result = Result{
+		"name": h.Filename,
 		"path": filename,
 	}
-	c.JsonReturn("上传文件接口", result, 200)
+	c.JsonReturn("上传图片成功!", result, 200)
 }
-
-

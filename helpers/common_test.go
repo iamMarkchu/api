@@ -19,5 +19,6 @@ func TestCheckEmail(t *testing.T) {
 }
 
 func TestCheckDirectory(t *testing.T) {
-	CheckDirectory("/Users/mark/go/src/api/static/upload/")
+
+	// CheckDirectory("/Users/mark/go/src/api/static/upload/")
 }
