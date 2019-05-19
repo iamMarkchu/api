@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	StatusInActive = iota
-	StatusNormal
+	StatusNormal = iota + 1
+	StatusInActive
 	StatusBanned
 
 	FormatTimeString = "2006-01-02 15:04:05"

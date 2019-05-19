@@ -3,13 +3,11 @@ package controllers
 import (
 	"api/controllers/requests"
 	. "api/helpers"
-	"api/helpers/cache"
+	"api/helpers/page"
 	"api/models"
 	"api/services"
-	"fmt"
-	bcache "github.com/astaxie/beego/cache"
 	"net/http"
-	"strings"
+	"strconv"
 )
 
 type ArticleController struct {
@@ -21,25 +19,58 @@ func (c *ArticleController) URLMapping() {
 	c.Mapping("Store", c.Store)
 }
 
+// Title articles/index
+// Param status formData int8 false "状态"
+// Param page   formData int  false "页数"
+// Param limit  formData int  false "每页数量"
 // @router / [get]
 func (c *ArticleController) Index() {
-	var articles []models.Article
-	c.JsonReturn("文章列表接口", articles, http.StatusOK)
+	var (
+		articleService = services.NewArticleService()
+		r              requests.ArticleIndexRequest
+		err            error
+		queryMap       map[string]string
+		result         page.Page
+	)
+	if err = c.ParseForm(&r); err != nil {
+		c.JsonReturn("解析参数错误:"+err.Error(), "", http.StatusBadRequest)
+	}
+
+	queryMap = map[string]string{
+		"Status": strconv.Itoa(int(r.Status)),
+	}
+	result, err = articleService.GetArticles(queryMap, r.Page, r.Limit)
+	if err != nil {
+		c.JsonReturn("文章列表报错:"+err.Error(), "", http.StatusBadRequest)
+		return
+	}
+	c.JsonReturn("文章列表接口", result, http.StatusOK)
 }
 
 // @router / [post]
 func (c *ArticleController) Store() {
-	r := requests.ArticleStoreRequest{}
-	c.ValidateRequest(r)
-	articleService := services.NewArticleService()
-	// 获取UserId
-	bm := cache.GetCacheInstance()
-	token := strings.TrimPrefix(c.Ctx.Input.Header("Authorization"), "Bearer ")
-	userId := bcache.GetInt(bm.Get(MD5(token)))
-	fmt.Println("userId:", userId)
-	article, isSuccess := articleService.Store(r, userId)
-	if isSuccess {
-		c.JsonReturn("新建文章接口", article, http.StatusOK)
+	// todo 能否使用一个基类方法统一验证请求参数？
+	// c.ValidateRequest(requests.ArticleStoreRequest{})
+	var r = requests.ArticleStoreRequest{}
+	if err = c.ParseForm(&r); err != nil {
+		c.JsonReturn("解析参数错误: "+err.Error(), "", http.StatusBadRequest)
+		return
 	}
-	c.JsonReturn("新建文章失败", models.Article{}, http.StatusBadRequest)
+	isValid, _ = valid.Valid(&r)
+	if !isValid {
+		c.JsonReturn("参数不符合要求!", GetErrorMap(valid.Errors), http.StatusBadRequest)
+		return
+	}
+
+	var (
+		articleService = services.NewArticleService()
+		article        = models.NewArticle()
+		isSuccess      bool
+	)
+	article, isSuccess = articleService.Store(r, c.UserId)
+	if isSuccess {
+		c.JsonReturn("创建文章成功!", article, http.StatusOK)
+		return
+	}
+	c.JsonReturn("创建文章失败!", article, http.StatusBadRequest)
 }
