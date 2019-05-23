@@ -2,9 +2,7 @@ package models
 
 import (
 	. "api/helpers"
-	"fmt"
 	"github.com/astaxie/beego/orm"
-	"strconv"
 )
 
 type Article struct {
@@ -47,9 +45,7 @@ func (a *Article) GetList(queryMap map[string]string, page int, limit int) ([]*A
 	)
 	q = o.QueryTable(a)
 	if status, ok := queryMap["Status"]; ok && status != "0" {
-		fmt.Println("status:", status)
-		statusInt,_ := strconv.Atoi(status)
-		q.Filter("Status", statusInt)
+		q = q.Filter("status", status)
 	}
 	_, err = q.Limit(limit, (page-1)*limit).RelatedSel().All(&articles)
 	go CheckError(err, "获取文章列表报错:")
@@ -61,6 +57,17 @@ func (a *Article) GetList(queryMap map[string]string, page int, limit int) ([]*A
 		article.Category.FormatDatetime()
 	}
 	return articles, count, err
+}
+
+func (a *Article) GetById(i int) (*Article, error) {
+	var (
+		o   = orm.NewOrm()
+		err error
+	)
+	a.Id = i
+	err = o.Read(a)
+	go CheckError(err, "通过id获取文章")
+	return a, err
 }
 
 func NewArticle() *Article {
