@@ -27,14 +27,14 @@ func (c *PublicController) Login() {
 		return
 	}
 	userService := services.NewUserService()
-	token, expires_in, err := userService.Login(r)
+	token, expiresIn, err := userService.Login(r)
 	if err != nil {
 		c.JsonReturn("登录错误:" + err.Error(), "", http.StatusForbidden)
 		return
 	}
-	result := map[string]string{
+	result = Result{
 		"token": token,
-		"expires_in": expires_in,
+		"expires_in": expiresIn,
 	}
 	c.JsonReturn("登录成功!", result, http.StatusOK)
 }

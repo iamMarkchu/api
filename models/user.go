@@ -4,19 +4,16 @@ import (
 	"api/controllers/requests"
 	"api/helpers"
 	"github.com/astaxie/beego/orm"
-	"time"
 )
 
 type User struct {
-	Id        int    `orm:"auto"`
-	UserName  string `orm:"size(30);description(用户名)"`
-	Password  string  `orm:"default('');description(密码)"`
-	Email     string  `orm:"default('');description(电子邮箱)"`
-	Mobile    string    `orm:"default('');description(手机号)"`
-	Age       uint8     `orm:"default(0);description(年龄)"`
-	Status    uint8     `orm:"default(1);description(状态字段)"`
-	CreatedAt time.Time `orm:"auto_now_add;type(datetime)"`
-	UpdatedAt time.Time `orm:"auto_now;type(datetime)"`
+	Id        int    `orm:"auto" json:"id"`
+	UserName  string `orm:"size(30);description(用户名)" json:"user_name"`
+	Password  string  `orm:"default('');description(密码)" json:"-"`
+	Email     string  `orm:"default('');description(电子邮箱)" json:"email"`
+	Mobile    string    `orm:"default('');description(手机号)" json:"mobile"`
+	Age       uint8     `orm:"default(0);description(年龄)" json:"age"`
+	BaseModel
 }
 
 func (u *User) TableName() string {
@@ -27,6 +24,13 @@ func (u *User) GetUserByName(username string) (*User, error) {
 	o := orm.NewOrm()
 	u.UserName = username
 	err := o.Read(u, "UserName")
+	return u, err
+}
+
+func (u *User) GetUserById(id int) (*User, error)  {
+	o := orm.NewOrm()
+	u.Id = id
+	err := o.Read(u)
 	return u, err
 }
 

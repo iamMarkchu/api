@@ -5,7 +5,10 @@ import (
 	"encoding/hex"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
+	"os"
+	"path"
 	"regexp"
+	"time"
 )
 
 // 判断邮箱是否合法
@@ -22,16 +25,29 @@ func MD5(s string) string {
 }
 
 // 检查错误
-func CheckError(err error, msg string)  {
+func CheckError(err error, msg string) {
 	if err != nil {
 		logs.Info("["+msg+"]:", err.Error())
 	}
 }
 
-func GetErrorMap(errs []*validation.Error) map[string]string  {
+func GetErrorMap(errs []*validation.Error) map[string]string {
 	var errorMaps = make(map[string]string)
 	for _, err := range errs {
 		errorMaps[err.Key] = err.Message
 	}
 	return errorMaps
+}
+
+// 检查路径是否存在，是否可写
+func CheckDirectory(dir string) {
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		go logs.Info(err.Error())
+	}
+}
+
+// 获取唯一的文件名
+func GetUniqueFileName(fileName string) string {
+	return time.Now().Format("2006/01/02/") + MD5(fileName+time.Now().Format("150405000000")) + path.Base(fileName)
 }

@@ -8,19 +8,19 @@ import (
 )
 
 var auth = func(c *context.Context) {
-	token := strings.TrimPrefix(c.Input.Header("Authorization"),"Bearer ")
+	token := strings.TrimPrefix(c.Input.Header("Authorization"), "Bearer ")
 	_, isValid := jwt.CheckToken(token)
 	if !isValid {
 		c.Output.Status = http.StatusUnauthorized
-		c.Output.JSON(JsonReturn("toekn验证失败", "", http.StatusUnauthorized), true, true, )
+		c.Output.JSON(JsonReturn("toekn验证失败", "", http.StatusUnauthorized), true, true)
 		return
 	}
 }
 
-func JsonReturn(message string, result interface{}, code int) map[string]interface{}  {
+func JsonReturn(message string, result interface{}, code int) map[string]interface{} {
 	return map[string]interface{}{
 		"message": message,
-		"result": "",
-		"code": http.StatusUnauthorized,
+		"result":  "",
+		"code":    http.StatusUnauthorized,
 	}
 }

@@ -3,11 +3,13 @@ package services
 import (
 	"api/controllers/requests"
 	. "api/helpers"
+	"api/helpers/cache"
 	"api/helpers/jwt"
 	"api/models"
 	"errors"
 	"github.com/astaxie/beego/orm"
 	"strconv"
+	"time"
 )
 
 type UserService struct {
@@ -51,7 +53,17 @@ func (u *UserService) Login(r requests.LoginRequest) (string, string, error) {
 	}
 	// todo生成token
 	auth := jwt.GetToken(strconv.Itoa(user.Id))
+	// 缓存token
+	bm := cache.GetCacheInstance()
+	err = bm.Put(MD5(auth.Token), user.Id, time.Second*60*60*24)
+	go CheckError(err, "设置token缓存报错:")
 	return auth.Token, auth.ExpireIn, nil
+}
+
+func (u *UserService) GetUserById(id string) (*models.User, error) {
+	userModel := models.NewUser()
+	idTransfer,_ := strconv.Atoi(id)
+	return userModel.GetUserById(idTransfer)
 }
 
 func NewUserService() *UserService {
