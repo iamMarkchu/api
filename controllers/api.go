@@ -7,6 +7,7 @@ import (
 	bcache "github.com/astaxie/beego/cache"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
+	"strconv"
 	"strings"
 )
 
@@ -71,3 +72,12 @@ func (c *ApiController) JsonReturn(message string, result interface{}, code int)
 //		c.JsonReturn("参数不符合要求!", GetErrorMap(valid.Errors), http.StatusBadRequest)
 //	}
 //}
+
+func (c *ApiController) getId() int {
+	var id int
+	id, err = strconv.Atoi(c.Ctx.Input.Param(":id"))
+	if err != nil {
+		return 0
+	}
+	return id
+}

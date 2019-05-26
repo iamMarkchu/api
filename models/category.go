@@ -33,3 +33,7 @@ func (c *Category) Store() (int64, error) {
 	go CheckError(err, "Category载入关系报错:")
 	return insertId, err
 }
+
+func NewCategory() *Category {
+	return &Category{}
+}

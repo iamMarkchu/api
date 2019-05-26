@@ -11,6 +11,14 @@ import (
 
 type CategoryController struct {
 	ApiController
+	categoryService *services.CategoryService
+	categoryModel   *models.Category
+}
+
+func (c *CategoryController) Prepare() {
+	c.ApiController.Prepare()
+	c.categoryService = services.NewCategoryService()
+	c.categoryModel = models.NewCategory()
 }
 
 func (c *CategoryController) URLMapping() {
@@ -20,7 +28,13 @@ func (c *CategoryController) URLMapping() {
 
 // @router / [get]
 func (c *CategoryController) Index() {
-
+	var categories []*models.Category
+	categories, err = c.categoryService.GetList()
+	if err != nil {
+		c.JsonReturn("类别列表接口报错:"+err.Error(), "", http.StatusBadRequest)
+		return
+	}
+	c.JsonReturn("类别列表接口", categories, http.StatusOK)
 }
 
 // @router / [post]

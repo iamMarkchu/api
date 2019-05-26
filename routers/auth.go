@@ -12,7 +12,7 @@ var auth = func(c *context.Context) {
 	_, isValid := jwt.CheckToken(token)
 	if !isValid {
 		c.Output.Status = http.StatusUnauthorized
-		c.Output.JSON(JsonReturn("toekn验证失败", "", http.StatusUnauthorized), true, true, )
+		c.Output.JSON(JsonReturn("toekn验证失败", "", http.StatusUnauthorized), true, true)
 		return
 	}
 }

@@ -12,6 +12,14 @@ import (
 
 type ArticleController struct {
 	ApiController
+	articleService *services.ArticleService
+	articleModel   *models.Article
+}
+
+func (c *ArticleController) Prepare() {
+	c.ApiController.Prepare()
+	c.articleService = services.NewArticleService()
+	c.articleModel = models.NewArticle()
 }
 
 func (c *ArticleController) URLMapping() {
@@ -19,6 +27,9 @@ func (c *ArticleController) URLMapping() {
 	c.Mapping("Store", c.Store)
 	c.Mapping("Update", c.Update)
 	c.Mapping("Show", c.Show)
+	c.Mapping("Delete", c.Delete)
+	c.Mapping("Publish", c.Publish)
+	c.Mapping("Reset", c.Reset)
 }
 
 // Title articles/index
@@ -28,11 +39,9 @@ func (c *ArticleController) URLMapping() {
 // @router / [get]
 func (c *ArticleController) Index() {
 	var (
-		articleService = services.NewArticleService()
-		r              requests.ArticleIndexRequest
-		err            error
-		queryMap       map[string]string
-		result         page.Page
+		r        requests.ArticleIndexRequest
+		queryMap map[string]string
+		result   page.Page
 	)
 	if err = c.ParseForm(&r); err != nil {
 		c.JsonReturn("解析参数错误:"+err.Error(), "", http.StatusBadRequest)
@@ -41,7 +50,7 @@ func (c *ArticleController) Index() {
 	queryMap = map[string]string{
 		"Status": strconv.Itoa(int(r.Status)),
 	}
-	result, err = articleService.GetArticles(queryMap, r.Page, r.Limit)
+	result, err = c.articleService.GetArticles(queryMap, r.Page, r.Limit)
 	if err != nil {
 		c.JsonReturn("文章列表报错:"+err.Error(), "", http.StatusBadRequest)
 		return
@@ -64,29 +73,22 @@ func (c *ArticleController) Store() {
 		return
 	}
 
-	var (
-		articleService = services.NewArticleService()
-		article        = models.NewArticle()
-		isSuccess      bool
-	)
-	article, isSuccess = articleService.Store(r, c.UserId)
+	var isSuccess bool
+	c.articleModel, isSuccess = c.articleService.Store(r, c.UserId)
 	if isSuccess {
-		c.JsonReturn("创建文章成功!", article, http.StatusOK)
+		c.JsonReturn("创建文章成功!", c.articleModel, http.StatusOK)
 		return
 	}
-	c.JsonReturn("创建文章失败!", article, http.StatusBadRequest)
+	c.JsonReturn("创建文章失败!", models.NewArticle(), http.StatusBadRequest)
 }
 
 // @router /:id [put]
 func (c *ArticleController) Update() {
 	var (
-		id             int
-		r              requests.ArticleUpdateRequest
-		err            error
-		articleService = services.NewArticleService()
-		article        = models.NewArticle()
+		id int
+		r  requests.ArticleUpdateRequest
 	)
-	id, err = strconv.Atoi(c.Ctx.Input.Param(":id"))
+	id = c.getId()
 	if err != nil {
 		c.JsonReturn("获取文章id失败", "", http.StatusBadRequest)
 		return
@@ -102,30 +104,72 @@ func (c *ArticleController) Update() {
 		c.JsonReturn("参数不符合要求!", GetErrorMap(valid.Errors), http.StatusBadRequest)
 		return
 	}
-	article, err = articleService.Update(r, id)
+	c.articleModel, err = c.articleService.Update(r, id)
 	if err != nil {
 		c.JsonReturn("文章更新失败:"+err.Error(), "", http.StatusBadRequest)
 		return
 	}
-	c.JsonReturn("文章更新成功!", article, http.StatusBadRequest)
+	c.JsonReturn("文章更新成功!", c.articleModel, http.StatusBadRequest)
 }
 
 // @router /:id [get]
 func (c *ArticleController) Show() {
-	var (
-		id             int
-		articleService = services.NewArticleService()
-		article        = models.NewArticle()
-	)
-	id, err = strconv.Atoi(c.Ctx.Input.Param(":id"))
+	var id int
+	id = c.getId()
 	if err != nil {
 		c.JsonReturn("获取文章id失败", "", http.StatusBadRequest)
 		return
 	}
-	article, err = articleService.FetchOne(id)
+	c.articleModel, err = c.articleService.FetchOne(id)
 	if err == nil {
-		c.JsonReturn("获取一篇文章", article, http.StatusOK)
+		c.JsonReturn("获取文章成功", c.articleModel, http.StatusOK)
 		return
 	}
-	c.JsonReturn("获取一篇文章报错: " + err.Error(), "", http.StatusBadRequest)
+	c.JsonReturn("获取文章失败: "+err.Error(), "", http.StatusBadRequest)
+}
+
+// @router /:id [delete]
+func (c *ArticleController) Delete() {
+	var id int
+	id = c.getId()
+	if err != nil {
+		c.JsonReturn("获取文章id失败", "", http.StatusBadRequest)
+		return
+	}
+	_, err = c.articleService.DeleteById(id)
+	if err == nil {
+		c.JsonReturn("文章删除成功!", "", http.StatusOK)
+		return
+	}
+	c.JsonReturn("文章删除失败:"+err.Error(), "", http.StatusBadRequest)
+}
+
+// @router /:id/publish [put]
+func (c *ArticleController) Publish() {
+	var id int
+	id = c.getId()
+	if err != nil {
+		c.JsonReturn("获取文章id失败", "", http.StatusBadRequest)
+	}
+	_, err = c.articleService.PublishById(id)
+	if err == nil {
+		c.JsonReturn("文章发布成功!", "", http.StatusOK)
+		return
+	}
+	c.JsonReturn("文章发布失败:"+err.Error(), "", http.StatusBadRequest)
+}
+
+// @router /:id/reset [put]
+func (c *ArticleController) Reset()  {
+	var id int
+	id = c.getId()
+	if err != nil {
+		c.JsonReturn("获取文章id失败", "", http.StatusBadRequest)
+	}
+	_, err = c.articleService.ResetById(id)
+	if err == nil {
+		c.JsonReturn("文章重置成功!", "", http.StatusOK)
+		return
+	}
+	c.JsonReturn("文章重置失败:"+err.Error(), "", http.StatusBadRequest)
 }

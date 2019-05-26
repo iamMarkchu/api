@@ -6,9 +6,13 @@ import (
 	"api/models"
 	"fmt"
 	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
 )
 
 type CategoryService struct {
+	category   *models.Category
+	dbInstance orm.Ormer
+	query      orm.QuerySeter
 }
 
 func (s *CategoryService) Store(r requests.CategoryStoreRequest, userId int) (models.Category, bool) {
@@ -32,6 +36,21 @@ func (s *CategoryService) Store(r requests.CategoryStoreRequest, userId int) (mo
 	return categoryModel, isSuccess
 }
 
+func (s *CategoryService) GetList() ([]*models.Category, error) {
+	var categories []*models.Category
+	_, err = s.dbInstance.QueryTable(s.category).All(&categories)
+	if err == nil {
+		for _, category := range categories {
+			category.FormatDatetime()
+		}
+		return categories, nil
+	}
+	return nil, err
+}
+
 func NewCategoryService() *CategoryService {
-	return &CategoryService{}
+	return &CategoryService{
+		category:   models.NewCategory(),
+		dbInstance: orm.NewOrm(),
+	}
 }
