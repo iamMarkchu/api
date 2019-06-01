@@ -59,6 +59,7 @@ func (c *CategoryController) Store() {
 	category, isSuccess = categoryService.Store(r, c.UserId)
 	if isSuccess {
 		c.JsonReturn("创建类别接口", category, http.StatusOK)
+		return
 	}
 	c.JsonReturn("创建类别失败", category, http.StatusBadRequest)
 }

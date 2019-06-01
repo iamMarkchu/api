@@ -1,19 +1,19 @@
-FROM library/golang
-
-# Godep for vendoring
-RUN go get github.com/tools/godep
-
-# Recompile the standard library without CGO
-RUN CGO_ENABLED=0 go install -a std
+FROM golang:1.11.4
 
 ENV APP_DIR $GOPATH/src/api
 RUN mkdir -p $APP_DIR
 
 # Set the entrypoint
-ENTRYPOINT (cd $APP_DIR && ./src/api)
+ENTRYPOINT (cd $APP_DIR && ./api)
 ADD . $APP_DIR
 
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.io
+ENV CGO_ENABLED 0
+ENV APIRUNMODE prod
 # Compile the binary and statically link
-# RUN cd $APP_DIR && CGO_ENABLED=0 godep go build -ldflags '-d -w -s'
+RUN cd $APP_DIR && go mod vendor
 
-# EXPOSE 8080
+RUN cd $APP_DIR && go build
+
+EXPOSE 8080
