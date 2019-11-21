@@ -10,3 +10,5 @@ require (
 	google.golang.org/appengine v1.6.0 // indirect
 	qiniupkg.com/x v7.0.8+incompatible // indirect
 )
+
+go 1.13

@@ -46,7 +46,6 @@ func (c *ArticleController) Index() {
 	if err = c.ParseForm(&r); err != nil {
 		c.JsonReturn("解析参数错误:"+err.Error(), "", http.StatusBadRequest)
 	}
-
 	queryMap = map[string]string{
 		"Status": strconv.Itoa(int(r.Status)),
 	}
@@ -64,7 +63,7 @@ func (c *ArticleController) Store() {
 	// c.ValidateRequest(requests.ArticleStoreRequest{})
 	var r = requests.ArticleStoreRequest{}
 	if err = c.ParseForm(&r); err != nil {
-		c.JsonReturn("解析参数错误: "+err.Error(), "", http.StatusBadRequest)
+		c.JsonReturn("解析参数错误: "+err.Error(), nil, http.StatusBadRequest)
 		return
 	}
 	isValid, _ = valid.Valid(&r)
