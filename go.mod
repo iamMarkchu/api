@@ -2,6 +2,7 @@ module api
 
 require (
 	github.com/astaxie/beego v1.11.1
+	github.com/casbin/casbin v1.7.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/qiniu/api.v7 v7.2.5+incompatible

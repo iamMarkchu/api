@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
+	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -50,4 +51,12 @@ func CheckDirectory(dir string) {
 // 获取唯一的文件名
 func GetUniqueFileName(fileName string) string {
 	return time.Now().Format("2006/01/02/") + MD5(fileName+time.Now().Format("150405000000")) + path.Base(fileName)
+}
+
+func JsonReturn(message string, result interface{}, code int) map[string]interface{} {
+	return map[string]interface{}{
+		"message": message,
+		"result":  "",
+		"code":    http.StatusUnauthorized,
+	}
 }

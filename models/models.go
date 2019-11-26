@@ -18,15 +18,8 @@ const (
 
 type BaseModel struct {
 	Status          uint8     `orm:"default(1);description(状态字段)" json:"status"`
-	CreatedAt       time.Time `orm:"auto_now_add;type(datetime)" json:"-"`
-	UpdatedAt       time.Time `orm:"auto_now;type(datetime)" json:"-"`
-	CreatedAtFormat string    `orm:"-" json:"created_at"`
-	UpdatedAtFormat string    `orm:"-" json:"updated_at"`
-}
-
-func (m *BaseModel) FormatDatetime() {
-	m.CreatedAtFormat = m.CreatedAt.Format(FormatTimeString)
-	m.UpdatedAtFormat = m.UpdatedAt.Format(FormatTimeString)
+	CreatedAt       time.Time `orm:"auto_now_add;type(datetime)" json:"created_at"`
+	UpdatedAt       time.Time `orm:"auto_now;type(datetime)" json:"updated_at"`
 }
 
 func init() {

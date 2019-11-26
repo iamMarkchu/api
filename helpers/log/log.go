@@ -7,7 +7,7 @@ import (
 
 func init()  {
 	logs.EnableFuncCallDepth(true)
-	err := logs.SetLogger(logs.AdapterFile, `{"filename":"./test.log"}`)
+	err := logs.SetLogger(logs.AdapterFile, `{"filename":"./api.log"}`)
 	if err != nil {
 		fmt.Println("设置日志处理报错:", err.Error())
 	}

@@ -15,34 +15,28 @@ type ArticleService struct {
 	query      orm.QuerySeter
 }
 
-func (s *ArticleService) Store(r requests.ArticleStoreRequest, userId int) (*models.Article, bool) {
-	// 保存值
-	s.article.Author = &models.User{Id: userId}
-	s.article.Category = &models.Category{Id: r.CategoryId}
+func (s *ArticleService) Store(r requests.ArticleStoreRequest, userId int) (*models.Article, error) {
+	var (
+		err error
+	)
+	s.article.AuthorId = userId
+	s.article.CateId = r.CategoryId
 	s.article.Title = r.Title
 	s.article.Description = r.Description
 	s.article.ImageUrl = r.ImageUrl
 	s.article.Status = models.StatusInActive
 
+	// 判断类别是否存在
+	if r.CategoryId > 0 {
+		if err = NewCategoryService().CheckExist(r.CategoryId); err != nil {
+			return nil, err
+		}
+	}
 	// 插入数据库
 	if _, err = s.dbInstance.Insert(s.article); err == nil {
-		// 格式化时间并载入author,category关系
-		s.article.FormatDatetime()
-		_, err = s.dbInstance.LoadRelated(s.article, "Author")
-		if err != nil {
-			logs.Error("载入Author关系报错:", err)
-		}
-		s.article.Author.FormatDatetime()
-		if s.article.Category.Id != 0 {
-			_, err = s.dbInstance.LoadRelated(s.article, "Category")
-			if err != nil {
-				logs.Error("载入Category关系报错:", err)
-			}
-			s.article.Category.FormatDatetime()
-		}
-		return s.article, true
+		return s.article, nil
 	}
-	return nil, false
+	return nil, err
 }
 
 func (s *ArticleService) GetArticles(queryMap map[string]string, pageNo int, limit int) (page.Page, error) {
@@ -75,11 +69,10 @@ func (s *ArticleService) Update(r requests.ArticleUpdateRequest, articleId int) 
 		// 赋值
 		s.article.Title = r.Title
 		s.article.Description = r.Description
-		s.article.Category.Id = r.CategoryId
+		s.article.CateId = r.CategoryId
 		s.article.ImageUrl = r.ImageUrl
 		// 更新操作
 		if _, err := s.dbInstance.Update(s.article); err == nil {
-			s.article.FormatDatetime()
 			logs.Info("更新文章:", s.article)
 			return s.article, nil
 		}
@@ -91,11 +84,6 @@ func (s *ArticleService) FetchOne(articleId int) (*models.Article, error) {
 	s.article.Id = articleId
 	// 查询文章
 	if err = s.GetArticle(s.article); err == nil {
-		s.article.FormatDatetime()
-		_, _ = s.dbInstance.LoadRelated(s.article, "Author")
-		s.article.Author.FormatDatetime()
-		_, _ = s.dbInstance.LoadRelated(s.article, "Category")
-		s.article.Category.FormatDatetime()
 		return s.article, nil
 	}
 	return nil, err
@@ -107,7 +95,6 @@ func (s *ArticleService) DeleteById(articleId int) (*models.Article, error) {
 		if s.article.Status != models.StatusNormal {
 			s.article.Status = models.StatusBanned
 			if _, err = s.dbInstance.Update(s.article, "Status"); err == nil {
-				s.article.FormatDatetime()
 				return s.article, nil
 			}
 		} else {
@@ -123,7 +110,6 @@ func (s *ArticleService) PublishById(id int) (*models.Article, error) {
 		if s.article.Status == models.StatusInActive {
 			s.article.Status = models.StatusNormal
 			if _, err = s.dbInstance.Update(s.article, "Status"); err == nil {
-				s.article.FormatDatetime()
 				return s.article, nil
 			}
 		} else {
@@ -138,7 +124,6 @@ func (s *ArticleService) ResetById(id int) (*models.Article, error) {
 		if s.article.Status == models.StatusBanned {
 			s.article.Status = models.StatusInActive
 			if _, err = s.dbInstance.Update(s.article, "Status"); err == nil {
-				s.article.FormatDatetime()
 				return s.article, nil
 			}
 		} else {

@@ -6,13 +6,19 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+var RoleMap = map[uint8]string{
+	1: "normal_users",
+	2: "admin",
+}
+
 type User struct {
-	Id        int    `orm:"auto" json:"id"`
-	UserName  string `orm:"size(30);description(用户名)" json:"user_name"`
-	Password  string  `orm:"default('');description(密码)" json:"-"`
-	Email     string  `orm:"default('');description(电子邮箱)" json:"email"`
-	Mobile    string    `orm:"default('');description(手机号)" json:"mobile"`
-	Age       uint8     `orm:"default(0);description(年龄)" json:"age"`
+	Id       int    `orm:"auto" json:"id"`
+	UserName string `orm:"size(30);description(用户名)" json:"user_name"`
+	Password string `orm:"description(密码)" json:"-"`
+	Email    string `orm:"description(电子邮箱)" json:"email"`
+	Mobile   string `orm:"description(手机号)" json:"mobile"`
+	Age      uint8  `orm:"default(0);description(年龄)" json:"age"`
+	RoleId   uint8  `orm:"default(1);description(角色id)" json:"role_id"`
 	BaseModel
 }
 
@@ -27,7 +33,7 @@ func (u *User) GetUserByName(username string) (*User, error) {
 	return u, err
 }
 
-func (u *User) GetUserById(id int) (*User, error)  {
+func (u *User) GetUserById(id int) (*User, error) {
 	o := orm.NewOrm()
 	u.Id = id
 	err := o.Read(u)

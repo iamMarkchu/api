@@ -3,6 +3,7 @@ package controllers
 import (
 	"api/controllers/requests"
 	"api/services"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,7 @@ func (c *PublicController) URLMapping() {
 // @router /login [post]
 func (c *PublicController) Login() {
 	r := requests.LoginRequest{}
+	fmt.Println("请求", r)
 	if err := c.ParseForm(&r); err != nil {
 		c.JsonReturn("解析参数错误: " + err.Error(), "", http.StatusNotFound)
 		return

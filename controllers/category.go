@@ -18,7 +18,6 @@ type CategoryController struct {
 func (c *CategoryController) Prepare() {
 	c.ApiController.Prepare()
 	c.categoryService = services.NewCategoryService()
-	c.categoryModel = models.NewCategory()
 }
 
 func (c *CategoryController) URLMapping() {
@@ -27,6 +26,7 @@ func (c *CategoryController) URLMapping() {
 }
 
 // @router / [get]
+// Description 类别列表接口
 func (c *CategoryController) Index() {
 	var categories []*models.Category
 	categories, err = c.categoryService.GetList()
@@ -38,12 +38,13 @@ func (c *CategoryController) Index() {
 }
 
 // @router / [post]
+// Description 保存类别接口
 func (c *CategoryController) Store() {
 	var (
 		r               = requests.CategoryStoreRequest{}
 		categoryService *services.CategoryService
-		category        models.Category
-		isSuccess       bool
+		category        *models.Category
+		err             error
 	)
 	// todo 能否使用一个基类方法统一验证请求参数？
 	// c.ValidateRequest(r)
@@ -56,10 +57,11 @@ func (c *CategoryController) Store() {
 		c.JsonReturn("参数不符合要求!", GetErrorMap(valid.Errors), http.StatusBadRequest)
 	}
 	categoryService = services.NewCategoryService()
-	category, isSuccess = categoryService.Store(r, c.UserId)
-	if isSuccess {
+	category, err = categoryService.Store(r, c.UserId)
+	if err != nil {
+		c.JsonReturn("创建类别失败:" + err.Error(), category, http.StatusBadRequest)
+	} else {
 		c.JsonReturn("创建类别接口", category, http.StatusOK)
-		return
 	}
-	c.JsonReturn("创建类别失败", category, http.StatusBadRequest)
+
 }

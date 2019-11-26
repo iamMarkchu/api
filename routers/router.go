@@ -23,6 +23,7 @@ func init() {
 	ns2 := beego.NewNamespace("/api",
 		beego.NSBefore(
 			auth,
+			count,
 		),
 		beego.NSNamespace("/articles",
 			beego.NSInclude(
@@ -32,6 +33,11 @@ func init() {
 		beego.NSNamespace("/categories",
 			beego.NSInclude(
 				&controllers.CategoryController{},
+			),
+		),
+		beego.NSNamespace("/users",
+			beego.NSInclude(
+				&controllers.UserController{},
 			),
 		),
 		beego.NSRouter("/upload", &controllers.UploadController{}),

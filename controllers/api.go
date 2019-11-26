@@ -1,14 +1,11 @@
 package controllers
 
 import (
-	. "api/helpers"
 	"api/helpers/cache"
 	"github.com/astaxie/beego"
 	bcache "github.com/astaxie/beego/cache"
-	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
 	"strconv"
-	"strings"
 )
 
 var (
@@ -36,9 +33,7 @@ type Result map[string]interface{}
 
 func (c *ApiController) Prepare() {
 	c.CacheInstance = cache.GetCacheInstance()
-	token := strings.TrimPrefix(c.Ctx.Input.Header("Authorization"), "Bearer ")
-	c.UserId = bcache.GetInt(c.CacheInstance.Get(MD5(token)))
-	logs.Info("USERID:", c.UserId)
+	c.UserId, _ = strconv.Atoi(c.Ctx.Input.Param("authUserId"))
 }
 
 func (c *ApiController) JsonReturn(message string, result interface{}, code int) {

@@ -4,7 +4,7 @@ import (
 	"api/controllers/requests"
 	. "api/helpers"
 	"api/helpers/cache"
-	"api/helpers/jwt"
+	"api/helpers/token"
 	"api/models"
 	"errors"
 	"github.com/astaxie/beego/orm"
@@ -52,7 +52,7 @@ func (u *UserService) Login(r requests.LoginRequest) (string, string, error) {
 		return "", "", errors.New("密码错误!")
 	}
 	// todo生成token
-	auth := jwt.GetToken(strconv.Itoa(user.Id))
+	auth := token.GetToken(strconv.Itoa(user.Id), models.RoleMap[uint8(user.Id)])
 	// 缓存token
 	bm := cache.GetCacheInstance()
 	err = bm.Put(MD5(auth.Token), user.Id, time.Second*60*60*24)

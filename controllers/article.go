@@ -58,6 +58,7 @@ func (c *ArticleController) Index() {
 }
 
 // @router / [post]
+// Description 新建文章接口
 func (c *ArticleController) Store() {
 	// todo 能否使用一个基类方法统一验证请求参数？
 	// c.ValidateRequest(requests.ArticleStoreRequest{})
@@ -72,9 +73,9 @@ func (c *ArticleController) Store() {
 		return
 	}
 
-	var isSuccess bool
-	c.articleModel, isSuccess = c.articleService.Store(r, c.UserId)
-	if isSuccess {
+	var err error
+	c.articleModel, err = c.articleService.Store(r, c.UserId)
+	if err == nil {
 		c.JsonReturn("创建文章成功!", c.articleModel, http.StatusOK)
 		return
 	}
