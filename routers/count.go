@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"api/helpers/cache"
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/logs"
 )

@@ -13,6 +13,10 @@ type Category struct {
 	BaseModel
 }
 
+func (c *Category) TableName() string {
+	return "categories"
+}
+
 func (c *Category) Store() (int64, error) {
 	var (
 		o        = orm.NewOrm()

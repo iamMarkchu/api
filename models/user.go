@@ -8,7 +8,7 @@ import (
 
 var RoleMap = map[uint8]string{
 	1: "normal_users",
-	2: "admin",
+	2: "admin_users",
 }
 
 type User struct {

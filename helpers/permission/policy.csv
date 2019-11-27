@@ -1,5 +1,5 @@
 p, normal_users, /api/users/:id, GET
 p, normal_users, /api/users, GET
 p, normal_users, /api/categories, GET
-p, admin_users, /api/categories, POST
-p, admin_users, /api/categories/:id, PUT
+p, normal_users, /api/categories, POST
+p, normal_users, /api/categories/:id, PUT

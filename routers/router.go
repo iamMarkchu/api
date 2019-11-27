@@ -9,10 +9,13 @@ package routers
 
 import (
 	"api/controllers"
+	"api/controllers/page"
 	"github.com/astaxie/beego"
 )
 
 func init() {
+	// page
+	beego.Router("/", &page.IndexController{})
 	// public api
 	ns := beego.NewNamespace("/public",
 		beego.NSInclude(
